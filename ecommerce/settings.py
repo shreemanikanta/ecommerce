@@ -36,6 +36,8 @@ ALLOWED_HOSTS = []
 
 PROJECT_APPS = [
     "apps.users",
+    "apps.core",
+    "apps.orders",
 ]
 
 INSTALLED_APPS = [

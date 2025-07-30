@@ -10,7 +10,8 @@ from apps.users.messages import (
    LOGIN_SUCCESSFUL,
    LOGIN_FAILED,
    INVALID_REFRESH_TOKEN,
-   LOGOUT_SUCCESSFUL
+   LOGOUT_SUCCESSFUL,
+    ACTIVATION_FAILED,
 )
 from utils.mixins import ResponseViewMixin
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -59,6 +60,11 @@ class LoginView(APIView, ResponseViewMixin):
                     message=INVALID_CREDENTIALS,
                     data={},
                 )
+            if not user.is_active:
+                return self.error_response(
+                    message=ACTIVATION_FAILED,
+                    data={}
+                )
             if user is not None:
                 RefreshToken.for_user(user)
 
@@ -101,10 +107,11 @@ class ActivateUserView(APIView, ResponseViewMixin):
             if default_token_generator.check_token(user, token):
                 user.is_active = True
                 user.save()
-                return self.success_response(message="Account activated successfully.")
+                return render(request, 'users/activation_success.html')
             else:
-                return self.error_response(message="Invalid or expired token.")
+                return render(request, "users/activation_failed.html")
         except Exception as e:
+            print(f"Activation error: {e}")
             return self.error_response(message="Activation failed.", data=str(e))
 
 

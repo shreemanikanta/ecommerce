@@ -10,4 +10,3 @@ class AppUserAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
     ]
-    readonly_fields = ["email", "password"]

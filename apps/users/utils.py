@@ -20,5 +20,14 @@ def send_activation_email(user, request):
     )
 
     subject = "Activate Your Account"
-    message = f"Hi {user.first_name},\n\nClick the link to activate your account:\n{activation_link}"
+    message = f"""
+    Hi {user.first_name},
+
+    Thanks for registering!
+
+    Please click the link below to activate your account:
+    {activation_link}
+
+    If you didn't register, just ignore this email.
+    """
     send_activation_email_task.delay(subject, message, user.email)

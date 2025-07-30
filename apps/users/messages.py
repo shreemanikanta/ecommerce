@@ -12,6 +12,7 @@ REGISTRATION_FAILED = "REGISTRATION_FAILED"
 # Login Messages
 LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL"
 LOGIN_FAILED = "LOGIN_FAILED"
+ACTIVATION_FAILED = "Account inactive. Please activate your account via the email we sent."
 
 # Logout Messages
 LOGOUT_SUCCESSFUL = "LOGOUT_SUCCESSFUL"

@@ -4,6 +4,9 @@ from apps.core.models import Category, Product
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Category model.
+    """
     list_display = [
         "uuid",
         "name",
@@ -15,6 +18,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Product model.
+    """
     list_display = [
         "uuid",
         "name",

@@ -7,6 +7,9 @@ from utils.mixins import ResponseViewMixin
 from apps.orders.serializers import OrderCreateSerializer, OrderSerializer, OrderItemSerializer
 
 class CreateOrderView(APIView, ResponseViewMixin):
+    """
+    CreateOrderView handles the creation of orders by authenticated users.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -33,6 +36,9 @@ class CreateOrderView(APIView, ResponseViewMixin):
         return self.success_response(message="Order placed successfully", data=serializer.data)
     
 class OrderListView(APIView, ResponseViewMixin):
+    """
+    OrderListView handles fetching and returning a list of orders for the authenticated user.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -41,6 +47,9 @@ class OrderListView(APIView, ResponseViewMixin):
         return self.success_response(data=serializer.data, message="Orders fetched")
     
 class OrderDetailView(APIView, ResponseViewMixin):
+    """
+    OrderDetailView handles retrieving the details of a specific order for an authenticated user.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, uuid):

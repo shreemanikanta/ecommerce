@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Product Management System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            padding-top: 60px;
+            z-index: 1000;
+        }
+        .sidebar a {
+            color: #adb5bd;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            transition: all 0.3s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #495057;
+            color: #fff;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding:  80px 20px 20px 20px;;
+            min-height: 100vh;
+        }
+        .navbar {
+            margin-left: 250px;
+            z-index: 1001;
+        }
+        .loading {
+            display: none;
+        }
+        .progress-container {
+            display: none;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-top: 0;
+            }
+            .main-content, .navbar {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cube me-2"></i>Product Management
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i><span id="username"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="/core/dashboard" class="nav-link" data-page="dashboard">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+        <a href="/core/products_page" class="nav-link" data-page="products">
+            <i class="fas fa-box me-2"></i>Products
+        </a>
+        <a href="/core/my-products_page" class="nav-link" data-page="my-products">
+            <i class="fas fa-user-tag me-2"></i>My Products
+        </a>
+        <a href="/core/orders" class="nav-link" data-page="orders">
+            <i class="fas fa-shopping-cart me-2"></i>Orders
+        </a> 
+        <div id="admin-menu" style="display: none;">
+            <a href="/core/categories_page" class="nav-link" data-page="categories">
+                <i class="fas fa-tags me-2"></i>Categories
+            </a>
+            <a href="/core/product-approval" class="nav-link" data-page="product-approval">
+                <i class="fas fa-check-circle me-2"></i>Product Approval
+            </a>
+            <a href="/core/generate-products" class="nav-link" data-page="generate-products">
+                <i class="fas fa-plus-circle me-2"></i>Generate Products
+            </a>
+            <a href="/core/export-products" class="nav-link" data-page="export-products">
+                <i class="fas fa-download me-2"></i>Export Products
+            </a>
+        </div>
+        <div id="staff-menu" style="display: none;">
+            <a href="/core/product-approval" class="nav-link" data-page="product-approval">
+                <i class="fas fa-check-circle me-2"></i>Product Approval
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading position-fixed top-50 start-50 translate-middle">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toast-title">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-body"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let access_token = localStorage.getItem('access_token');
+        let userRole = localStorage.getItem('role');
+        let username = localStorage.getItem('email');
+
+        // Check authentication
+        if (!access_token) {
+            window.location.href = "/users/login_page/";
+        }
+
+        // Set username in navbar
+        document.getElementById('username').textContent = username || 'User';
+
+        // Show admin menu if user is admin or staff
+        if (userRole === 'admin') {
+            document.getElementById('admin-menu').style.display = 'block';
+        } 
+        else if (userRole === 'staff') {
+            document.getElementById('staff-menu').style.display = 'block';
+        }
+        else {
+        document.getElementById('admin-menu').style.display = 'none';
+    }
+
+        // API Helper Functions
+        async function apiCall(url, method = 'GET', data = null, contentType = 'application/json') {
+            const config = {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                }
+            };
+
+            if (contentType === 'application/json') {
+                config.headers['Content-Type'] = 'application/json';
+                if (data) {
+                    config.body = JSON.stringify(data);
+                }
+            } else {
+                if (data) {
+                    config.body = data;
+                }
+            }
+
+            try {
+                showLoading(true);
+                const response = await fetch(url, config);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Request failed');
+                }
+                
+                return result;
+            } catch (error) {
+                showToast('Error', error.message, 'danger');
+                throw error;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Utility Functions
+        function showLoading(show) {
+            const loading = document.querySelector('.loading');
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastBody = document.getElementById('toast-body');
+            
+            toastTitle.textContent = title;
+            toastBody.textContent = message;
+            
+            toast.className = `toast bg-${type === 'success' ? 'success' : 'danger'} text-white`;
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('email');
+            window.location.href = "/users/login_page/";
+        }
+
+        // Set active nav link
+        function setActiveNav(page) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+        }
+    </script>
+    
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

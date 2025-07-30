@@ -7,6 +7,9 @@ class OrderItemCreateSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1)
 
 class OrderCreateSerializer(serializers.Serializer):
+    """
+    Serializer for creating an order, validates that the order contains at least one item.
+    """
     items = OrderItemCreateSerializer(many=True)
 
     def validate_items(self, value):
@@ -15,6 +18,9 @@ class OrderCreateSerializer(serializers.Serializer):
         return value
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    """
+    Serializer for OrderItem model, includes fields for UUID, product, product name, quantity, and price at the time of order.
+    """
     product_name = serializers.CharField(source="product.name", read_only=True)
 
     class Meta:
@@ -22,6 +28,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['uuid', 'product', 'product_name', 'quantity', 'price_at_order']
 
 class OrderSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Order model, including related order items.
+    """
     items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:

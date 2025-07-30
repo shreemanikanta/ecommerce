@@ -1,0 +1,332 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - Product Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Products
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-products">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Categories
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-categories">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tags fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                My Products
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="my-products">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-tag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total Orders
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-orders">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Products -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Products</h6>
+                    <a href="/core/products_page" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-products-table">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Product Status Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                    <a href="/core/orders/" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Items</th>
+                                    <th>Total Amount</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders-table">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Set active nav
+    setActiveNav('dashboard');
+
+    // Load dashboard data
+    async function loadDashboardData() {
+        try {
+            // Load products
+            const productsResponse = await apiCall('/core/products/');
+            const products = productsResponse.data || [];
+            
+            // Load categories
+            const categoriesResponse = await apiCall('/core/categories/');
+            const categories = categoriesResponse.data || [];
+            
+            // Load my products
+            const myProductsResponse = await apiCall('/core/my-products/');
+            const myProducts = myProductsResponse.data || [];
+            
+            // Load orders
+            const ordersResponse = await apiCall('/core/orders/');
+            const orders = ordersResponse.data || [];
+
+            // Load categories only for admin
+            var categories = [];
+            if (userRole === 'admin') {
+                const categoriesResponse = await apiCall('/core/categories/');
+                categories = categoriesResponse.data || [];
+            }
+
+            // Update stats
+            document.getElementById('total-products').textContent = products.length;
+            document.getElementById('my-products').textContent = myProducts.length;
+            document.getElementById('total-orders').textContent = orders.length;
+
+            // Only update category count for admin
+            const categoryElement = document.getElementById('total-categories');
+            if (userRole === 'admin') {
+                categoryElement.textContent = categories.length;
+            } else {
+                categoryElement.textContent = 'N/A';
+            }
+
+            // Load recent products and orders
+            loadRecentProducts(products.slice(0, 5));
+            loadRecentOrders(orders.slice(0, 5));
+
+            // Draw product status chart
+            createStatusChart(products);
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    }
+
+    function loadRecentProducts(products) {
+        const tbody = document.getElementById('recent-products-table');
+        
+        if (products.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No products found</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = products.map(product => `
+            <tr>
+                <td>${product.name}</td>
+                <td>${product.category?.name || 'N/A'}</td>
+                <td>$${parseFloat(product.price).toFixed(2)}</td>
+                <td>
+                    <span class="badge bg-${getStatusColor(product.status)}">
+                        ${product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                    </span>
+                </td>
+                <td>${new Date(product.created_at).toLocaleDateString()}</td>
+            </tr>
+        `).join('');
+    }
+
+    function loadRecentOrders(orders) {
+        const tbody = document.getElementById('recent-orders-table');
+        
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No orders found</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = orders.map(order => {
+            const totalAmount = order.items.reduce((sum, item) => 
+                sum + (parseFloat(item.price_at_order) * item.quantity), 0);
+            
+            return `
+                <tr>
+                    <td>#${order.uuid.slice(0, 8)}</td>
+                    <td>${order.items.length} item(s)</td>
+                    <td>$${totalAmount.toFixed(2)}</td>
+                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <a href="/orders/${order.uuid}" class="btn btn-sm btn-outline-primary">
+                            View Details
+                        </a>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function createStatusChart(products) {
+        const statusCounts = products.reduce((acc, product) => {
+            acc[product.status] = (acc[product.status] || 0) + 1;
+            return acc;
+        }, {});
+
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(statusCounts).map(status => 
+                    status.charAt(0).toUpperCase() + status.slice(1)
+                ),
+                datasets: [{
+                    data: Object.values(statusCounts),
+                    backgroundColor: [
+                        '#f6c23e', // pending - warning
+                        '#1cc88a', // approved - success  
+                        '#e74a3b', // rejected - danger
+                        '#6c757d'  // cancelled - secondary
+                    ],
+                    hoverBackgroundColor: [
+                        '#f4b619',
+                        '#17a673',
+                        '#e02d1b',
+                        '#545b62'
+                    ],
+                    borderWidth: 0,
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                },
+                cutout: 80,
+            },
+        });
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            'pending': 'warning',
+            'approved': 'success',
+            'rejected': 'danger',
+            'cancelled': 'secondary'
+        };
+        return colors[status] || 'secondary';
+    }
+
+    // Load data when page loads
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
+</script>
+{% endblock %}  

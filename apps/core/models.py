@@ -5,6 +5,9 @@ from django.conf import settings
 
 # Create your models here.
 class Category(TimeStampModel):
+    """
+    Category model representing a product category with a unique identifier, name, and optional description.
+    """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -13,6 +16,9 @@ class Category(TimeStampModel):
         return self.name
 
 class Product(TimeStampModel):
+    """
+    Product model representing an item in the e-commerce platform.
+    """
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),

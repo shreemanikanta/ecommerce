@@ -1,0 +1,581 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Export Products - Product Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-download me-2"></i>Export Products
+            </h1>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Export Configuration
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="exportForm">
+                        <!-- Export Format -->
+                        <div class="mb-4">
+                            <label class="form-label">Export Format</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportFormat" id="csvFormat" value="csv" checked>
+                                        <label class="form-check-label" for="csvFormat">
+                                            <i class="fas fa-file-csv me-2 text-success"></i>CSV (Comma Separated Values)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportFormat" id="excelFormat" value="excel">
+                                        <label class="form-check-label" for="excelFormat">
+                                            <i class="fas fa-file-excel me-2 text-success"></i>Excel (.xlsx)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Options -->
+                        <div class="mb-4">
+                            <h6>Filter Options</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="statusFilterExport" class="form-label">Status</label>
+                                        <select multiple class="form-select" id="statusFilterExport" size="4">
+                                            <option value="pending">Pending</option>
+                                            <option value="approved" selected>Approved</option>
+                                            <option value="rejected">Rejected</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="categoryFilterExport" class="form-label">Categories</label>
+                                        <select multiple class="form-select" id="categoryFilterExport" size="4">
+                                            <!-- Categories will be loaded here -->
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="mb-4">
+                            <h6>Date Range</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="endDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column Selection -->
+                        <div class="mb-4">
+                            <h6>Select Columns to Export</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_name" value="name" checked>
+                                        <label class="form-check-label" for="col_name">Product Name</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_category" value="category" checked>
+                                        <label class="form-check-label" for="col_category">Category</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_price" value="price" checked>
+                                        <label class="form-check-label" for="col_price">Price</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_stock" value="stock" checked>
+                                        <label class="form-check-label" for="col_stock">Stock</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_status" value="status" checked>
+                                        <label class="form-check-label" for="col_status">Status</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_description" value="description">
+                                        <label class="form-check-label" for="col_description">Description</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_created_by" value="created_by">
+                                        <label class="form-check-label" for="col_created_by">Created By</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_created_at" value="created_at" checked>
+                                        <label class="form-check-label" for="col_created_at">Created Date</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="col_updated_at" value="updated_at">
+                                        <label class="form-check-label" for="col_updated_at">Updated Date</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="previewExport()">
+                                <i class="fas fa-eye me-2"></i>Preview
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="exportProducts()">
+                                <i class="fas fa-download me-2"></i>Export Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Export Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border rounded p-3 mb-3">
+                                <div class="h4 mb-0 text-primary" id="totalProducts">0</div>
+                                <small class="text-muted">Total Products</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 mb-3">
+                                <div class="h4 mb-0 text-info" id="filteredProducts">0</div>
+                                <small class="text-muted">Filtered Products</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Status Distribution</h6>
+                        <div id="statusDistribution">
+                            <!-- Status counts will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Export History</h6>
+                        <div id="exportHistory" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Export history will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Export Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="badge bg-info">Records: <span id="previewCount">0</span></span>
+                        <span class="badge bg-secondary">Columns: <span id="previewColumns">0</span></span>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px;">
+                        <table class="table table-sm table-striped" id="previewTable">
+                            <!-- Preview data will be loaded here -->
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="exportProducts()">
+                        <i class="fas fa-download me-2"></i>Export This Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set active nav
+    setActiveNav('export-products');
+
+    let allProducts = [];
+    let allCategories = [];
+    let filteredProducts = [];
+
+    // Load initial data
+    async function loadInitialData() {
+        try {
+            // Load products
+            const productsResponse = await apiCall('/core/products/');
+            allProducts = productsResponse.data || [];
+            
+            // Load categories
+            const categoriesResponse = await apiCall('/core/categories/');
+            allCategories = categoriesResponse.data || [];
+            
+            populateCategoryFilter();
+            updateSummary();
+            loadExportHistory();
+            
+        } catch (error) {
+            console.error('Error loading data:', error);
+            showToast('Error', 'Failed to load data', 'danger');
+        }
+    }
+
+    function populateCategoryFilter() {
+        const categoryFilter = document.getElementById('categoryFilterExport');
+        categoryFilter.innerHTML = allCategories.map(category => 
+            `<option value="${category.uuid}">${category.name}</option>`
+        ).join('');
+    }
+
+    function updateSummary() {
+        const statusCounts = allProducts.reduce((acc, product) => {
+            acc[product.status] = (acc[product.status] || 0) + 1;
+            return acc;
+        }, {});
+
+        document.getElementById('totalProducts').textContent = allProducts.length;
+        
+        const statusDistribution = document.getElementById('statusDistribution');
+        statusDistribution.innerHTML = Object.entries(statusCounts).map(([status, count]) => `
+            <div class="d-flex justify-content-between mb-1">
+                <small>${status.charAt(0).toUpperCase() + status.slice(1)}</small>
+                <span class="badge bg-${getStatusColor(status)}">${count}</span>
+            </div>
+        `).join('');
+        
+        // Initially show all products as filtered
+        document.getElementById('filteredProducts').textContent = allProducts.length;
+        filteredProducts = [...allProducts];
+    }
+
+    function getFilteredProducts() {
+        // Get filter values
+        const selectedStatuses = Array.from(document.getElementById('statusFilterExport').selectedOptions)
+            .map(option => option.value);
+        const selectedCategories = Array.from(document.getElementById('categoryFilterExport').selectedOptions)
+            .map(option => option.value);
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        let filtered = allProducts.filter(product => {
+            // Status filter
+            if (selectedStatuses.length > 0 && !selectedStatuses.includes(product.status)) {
+                return false;
+            }
+            
+            // Category filter
+            if (selectedCategories.length > 0 && !selectedCategories.includes(product.category?.uuid)) {
+                return false;
+            }
+            
+            // Date range filter
+            const productDate = new Date(product.created_at).toISOString().split('T')[0];
+            if (startDate && productDate < startDate) {
+                return false;
+            }
+            if (endDate && productDate > endDate) {
+                return false;
+            }
+            
+            return true;
+        });
+
+        filteredProducts = filtered;
+        document.getElementById('filteredProducts').textContent = filtered.length;
+        
+        return filtered;
+    }
+
+    function getSelectedColumns() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="col_"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function previewExport() {
+        const products = getFilteredProducts();
+        const columns = getSelectedColumns();
+        
+        if (products.length === 0) {
+            showToast('Warning', 'No products match the current filters', 'warning');
+            return;
+        }
+        
+        if (columns.length === 0) {
+            showToast('Warning', 'Please select at least one column to export', 'warning');
+            return;
+        }
+        
+        const previewTable = document.getElementById('previewTable');
+        const previewCount = document.getElementById('previewCount');
+        const previewColumns = document.getElementById('previewColumns');
+        
+        previewCount.textContent = products.length;
+        previewColumns.textContent = columns.length;
+        
+        // Create table header
+        const headers = columns.map(col => getColumnDisplayName(col));
+        
+        // Show preview (limit to first 50 rows)
+        const previewData = products.slice(0, 50);
+        
+        let tableHTML = '<thead><tr>';
+        headers.forEach(header => {
+            tableHTML += `<th>${header}</th>`;
+        });
+        tableHTML += '</tr></thead><tbody>';
+        
+        previewData.forEach(product => {
+            tableHTML += '<tr>';
+            columns.forEach(column => {
+                tableHTML += `<td>${getColumnValue(product, column)}</td>`;
+            });
+            tableHTML += '</tr>';
+        });
+        
+        if (products.length > 50) {
+            tableHTML += `<tr><td colspan="${columns.length}" class="text-center text-muted">... and ${products.length - 50} more rows</td></tr>`;
+        }
+        
+        tableHTML += '</tbody>';
+        previewTable.innerHTML = tableHTML;
+        
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+    }
+
+    async function exportProducts() {
+        const products = getFilteredProducts();
+        const columns = getSelectedColumns();
+        const format = document.querySelector('input[name="exportFormat"]:checked').value;
+        
+        if (products.length === 0) {
+            showToast('Warning', 'No products match the current filters', 'warning');
+            return;
+        }
+        
+        if (columns.length === 0) {
+            showToast('Warning', 'Please select at least one column to export', 'warning');
+            return;
+        }
+        
+        showLoading(true);
+        
+        try {
+            // Prepare export data
+            const exportData = prepareExportData(products, columns);
+            
+            if (format === 'csv') {
+                downloadCSV(exportData, columns);
+            } else {
+                downloadExcel(exportData, columns);
+            }
+            
+            // Add to export history
+            addToExportHistory(products.length, columns.length, format);
+            loadExportHistory();
+            
+            showToast('Success', `Successfully exported ${products.length} products`);
+            
+        } catch (error) {
+            showToast('Error', 'Export failed: ' + error.message, 'danger');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function prepareExportData(products, columns) {
+        return products.map(product => {
+            const row = {};
+            columns.forEach(column => {
+                row[getColumnDisplayName(column)] = getColumnValue(product, column);
+            });
+            return row;
+        });
+    }
+
+    function downloadCSV(data, columns) {
+        const headers = columns.map(col => getColumnDisplayName(col));
+        
+        let csvContent = headers.join(',') + '\n';
+        
+        data.forEach(row => {
+            const values = headers.map(header => {
+                const value = row[header] || '';
+                // Escape commas and quotes
+                return `"${String(value).replace(/"/g, '""')}"`;
+            });
+            csvContent += values.join(',') + '\n';
+        });
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `products_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function downloadExcel(data, columns) {
+        // Simple Excel-like format using HTML table
+        const headers = columns.map(col => getColumnDisplayName(col));
+        
+        let excelContent = '<table border="1"><tr>';
+        headers.forEach(header => {
+            excelContent += `<th>${header}</th>`;
+        });
+        excelContent += '</tr>';
+        
+        data.forEach(row => {
+            excelContent += '<tr>';
+            headers.forEach(header => {
+                excelContent += `<td>${row[header] || ''}</td>`;
+            });
+            excelContent += '</tr>';
+        });
+        excelContent += '</table>';
+        
+        const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `products_export_${new Date().toISOString().split('T')[0]}.xls`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function getColumnDisplayName(column) {
+        const displayNames = {
+            'name': 'Product Name',
+            'category': 'Category',
+            'price': 'Price',
+            'stock': 'Stock',
+            'status': 'Status',
+            'description': 'Description',
+            'created_by': 'Created By',
+            'created_at': 'Created Date',
+            'updated_at': 'Updated Date'
+        };
+        return displayNames[column] || column;
+    }
+
+    function getColumnValue(product, column) {
+        switch (column) {
+            case 'name':
+                return product.name || '';
+            case 'category':
+                return product.category?.name || '';
+            case 'price':
+                return `${parseFloat(product.price || 0).toFixed(2)}`;
+            case 'stock':
+                return product.stock || 0;
+            case 'status':
+                return product.status.charAt(0).toUpperCase() + product.status.slice(1);
+            case 'description':
+                return product.description || '';
+            case 'created_by':
+                return product.created_by_name || 'Unknown';
+            case 'created_at':
+                return new Date(product.created_at).toLocaleString();
+            case 'updated_at':
+                return new Date(product.updated_at).toLocaleString();
+            default:
+                return '';
+        }
+    }
+
+    function addToExportHistory(recordCount, columnCount, format) {
+        const history = JSON.parse(localStorage.getItem('exportHistory') || '[]');
+        const newEntry = {
+            date: new Date().toISOString(),
+            recordCount: recordCount,
+            columnCount: columnCount,
+            format: format.toUpperCase()
+        };
+        
+        history.unshift(newEntry);
+        // Keep only last 10 entries
+        if (history.length > 10) {
+            history.splice(10);
+        }
+        
+        localStorage.setItem('exportHistory', JSON.stringify(history));
+    }
+
+    function loadExportHistory() {
+        const history = JSON.parse(localStorage.getItem('exportHistory') || '[]');
+        const container = document.getElementById('exportHistory');
+        
+        if (history.length === 0) {
+            container.innerHTML = '<small class="text-muted">No export history</small>';
+            return;
+        }
+        
+        container.innerHTML = history.map(entry => `
+            <div class="border-bottom pb-2 mb-2">
+                <div class="d-flex justify-content-between">
+                    <small><strong>${entry.recordCount}</strong> records</small>
+                    <small class="text-muted">${entry.format}</small>
+                </div>
+                <small class="text-muted">${new Date(entry.date).toLocaleString()}</small>
+            </div>
+        `).join('');
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            'pending': 'warning',
+            'approved': 'success',
+            'rejected': 'danger',
+            'cancelled': 'secondary'
+        };
+        return colors[status] || 'secondary';
+    }
+
+    // Add event listeners for real-time filtering
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInitialData();
+        
+        // Add change listeners to filters
+        ['statusFilterExport', 'categoryFilterExport', 'startDate', 'endDate'].forEach(id => {
+            document.getElementById(id).addEventListener('change', getFilteredProducts);
+        });
+    });
+</script>
+{% endblock %}

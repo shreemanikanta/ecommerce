@@ -1,0 +1,538 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Generate Products - Product Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-plus-circle me-2"></i>Generate Dummy Products
+            </h1>
+        </div>
+    </div>
+
+    <!-- Generation Form -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Product Generation Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="generateForm">
+                        <div class="mb-3">
+                            <label for="productCount" class="form-label">
+                                Number of Products to Generate <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" id="productCount" min="1" max="10000" value="100" required>
+                            <div class="form-text">Enter a number between 1 and 10,000</div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="categorySelect" class="form-label">Target Categories</label>
+                            <select multiple class="form-select" id="categorySelect" size="5">
+                                <!-- Categories will be loaded here -->
+                            </select>
+                            <div class="form-text">Select categories to generate products for. Leave empty to create for all categories.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priceRange" class="form-label">Price Range</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="minPrice" placeholder="Min Price" value="10" step="0.01" min="0">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="maxPrice" placeholder="Max Price" value="1000" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="stockRange" class="form-label">Stock Range</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="minStock" placeholder="Min Stock" value="0" min="0">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="maxStock" placeholder="Max Stock" value="100" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeDescriptions" checked>
+                                <label class="form-check-label" for="includeDescriptions">
+                                    Generate Descriptions
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoApprove">
+                                <label class="form-check-label" for="autoApprove">
+                                    Auto-approve Generated Products
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="generateProducts()" id="generateBtn">
+                                <i class="fas fa-play me-2"></i>Start Generation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Generation Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="progressContainer" style="display: none;">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Progress</span>
+                                <span id="progressText">0%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" id="progressBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <div class="h5 mb-0 text-success" id="generatedCount">0</div>
+                                    <small class="text-muted">Generated</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <div class="h5 mb-0 text-danger" id="failedCount">0</div>
+                                    <small class="text-muted">Failed</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <div class="h5 mb-0 text-info" id="remainingCount">0</div>
+                                    <small class="text-muted">Remaining</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="cancelGeneration()" id="cancelBtn">
+                                <i class="fas fa-stop me-2"></i>Cancel Generation
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="statusContainer">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <p>Configure the settings and click "Start Generation" to begin creating dummy products.</p>
+                        </div>
+                    </div>
+
+                    <!-- Generation Log -->
+                    <div id="logContainer" style="display: none;">
+                        <hr>
+                        <h6>Generation Log</h6>
+                        <div id="generationLog" style="max-height: 200px; overflow-y: auto;" class="border rounded p-2 bg-light">
+                            <!-- Log entries will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Generations -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Generations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Products Generated</th>
+                                    <th>Success Rate</th>
+                                    <th>Categories</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="generationHistory">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No generation history available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set active nav
+    setActiveNav('generate-products');
+
+    let categories = [];
+    let generationInProgress = false;
+    let generationCancelled = false;
+    let generationStats = {
+        total: 0,
+        generated: 0,
+        failed: 0,
+        remaining: 0
+    };
+
+    // Sample product names and descriptions for generation
+    const sampleProductNames = [
+        'Premium Wireless Headphones', 'Smart Fitness Tracker', 'Portable Bluetooth Speaker',
+        'Professional Camera Lens', 'Gaming Mechanical Keyboard', 'Ultra HD Monitor',
+        'Wireless Charging Pad', 'Smart Home Security Camera', 'Noise Cancelling Earbuds',
+        'Ergonomic Office Chair', 'LED Desk Lamp', 'Portable Power Bank',
+        'Waterproof Smartphone Case', 'Wireless Gaming Mouse', 'USB-C Hub',
+        'Smart Watch Band', 'Laptop Stand', 'Webcam HD 1080p',
+        'Bluetooth Car Adapter', 'Phone Ring Holder', 'Screen Protector',
+        'Cable Management Kit', 'Tablet Keyboard Case', 'Wireless Presenter',
+        'External Hard Drive', 'USB Flash Drive', 'Memory Card',
+        'HDMI Cable', 'Ethernet Cable', 'Power Adapter'
+    ];
+
+    const sampleDescriptions = [
+        'High-quality product with excellent build quality and modern design.',
+        'Perfect for daily use with long-lasting durability and performance.',
+        'Advanced features combined with user-friendly interface and sleek appearance.',
+        'Professional grade quality meets affordable pricing for everyone.',
+        'Innovative technology packed in a compact and portable design.',
+        'Premium materials used to ensure maximum comfort and reliability.',
+        'Enhanced functionality with smart features and easy setup process.',
+        'Designed for professionals who demand the best performance.',
+        'Eco-friendly materials combined with cutting-edge technology.',
+        'Versatile product suitable for both personal and professional use.'
+    ];
+
+    // Load categories on page load
+    async function loadCategories() {
+        try {
+            const response = await apiCall('/core/categories/');
+            categories = response.data || [];
+            
+            const categorySelect = document.getElementById('categorySelect');
+            categorySelect.innerHTML = categories.map(category => 
+                `<option value="${category.uuid}">${category.name}</option>`
+            ).join('');
+            
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            showToast('Error', 'Failed to load categories', 'danger');
+        }
+    }
+
+    // Generate products
+    async function generateProducts() {
+        if (generationInProgress) return;
+        
+        // Validate form
+        const count = parseInt(document.getElementById('productCount').value);
+        const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('maxPrice').value) || 1000;
+        const minStock = parseInt(document.getElementById('minStock').value) || 0;
+        const maxStock = parseInt(document.getElementById('maxStock').value) || 100;
+        
+        if (!count || count < 1 || count > 10000) {
+            showFieldError('productCount', 'Please enter a valid number between 1 and 10,000');
+            return;
+        }
+        
+        if (minPrice >= maxPrice) {
+            showToast('Error', 'Maximum price must be greater than minimum price', 'danger');
+            return;
+        }
+        
+        if (minStock >= maxStock) {
+            showToast('Error', 'Maximum stock must be greater than minimum stock', 'danger');
+            return;
+        }
+        
+        if (categories.length === 0) {
+            showToast('Error', 'No categories available. Please create categories first.', 'danger');
+            return;
+        }
+        
+        // Get selected categories
+        const selectedCategories = Array.from(document.getElementById('categorySelect').selectedOptions)
+            .map(option => option.value);
+        const targetCategories = selectedCategories.length > 0 ? selectedCategories : categories.map(c => c.uuid);
+        
+        const includeDescriptions = document.getElementById('includeDescriptions').checked;
+        const autoApprove = document.getElementById('autoApprove').checked;
+        
+        // Start generation
+        generationInProgress = true;
+        generationCancelled = false;
+        generationStats = {
+            total: count,
+            generated: 0,
+            failed: 0,
+            remaining: count
+        };
+        
+        // Update UI
+        document.getElementById('generateBtn').disabled = true;
+        document.getElementById('progressContainer').style.display = 'block';
+        document.getElementById('logContainer').style.display = 'block';
+        document.getElementById('statusContainer').innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-cogs me-2"></i>Generation in progress...
+            </div>
+        `;
+        
+        clearLog();
+        logMessage('Starting product generation...', 'info');
+        logMessage(`Target: ${count} products across ${targetCategories.length} categories`, 'info');
+        
+        // Generate products in batches
+        const batchSize = 10;
+        let currentBatch = 0;
+        
+        for (let i = 0; i < count && !generationCancelled; i += batchSize) {
+            const batchEnd = Math.min(i + batchSize, count);
+            const batchPromises = [];
+            
+            for (let j = i; j < batchEnd && !generationCancelled; j++) {
+                batchPromises.push(generateSingleProduct(targetCategories, minPrice, maxPrice, minStock, maxStock, includeDescriptions, autoApprove));
+            }
+            
+            try {
+                const results = await Promise.allSettled(batchPromises);
+                
+                results.forEach((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        generationStats.generated++;
+                        logMessage(`Product ${i + index + 1} created successfully`, 'success');
+                    } else {
+                        generationStats.failed++;
+                        logMessage(`Product ${i + index + 1} failed: ${result.reason}`, 'error');
+                    }
+                    generationStats.remaining--;
+                    updateProgress();
+                });
+                
+                // Small delay between batches to prevent overwhelming the server
+                if (!generationCancelled && batchEnd < count) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+            } catch (error) {
+                logMessage(`Batch ${currentBatch + 1} failed: ${error.message}`, 'error');
+            }
+            
+            currentBatch++;
+        }
+        
+        // Complete generation
+        generationInProgress = false;
+        document.getElementById('generateBtn').disabled = false;
+        
+        if (generationCancelled) {
+            logMessage('Generation cancelled by user', 'warning');
+            document.getElementById('statusContainer').innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Generation cancelled
+                </div>
+            `;
+        } else {
+            logMessage('Generation completed!', 'success');
+            document.getElementById('statusContainer').innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>Generation completed successfully!
+                </div>
+            `;
+            
+            // Add to history
+            addToHistory();
+        }
+        
+        showToast('Info', `Generation completed. ${generationStats.generated} products created, ${generationStats.failed} failed.`);
+    }
+
+    // Generate a single product
+    async function generateSingleProduct(targetCategories, minPrice, maxPrice, minStock, maxStock, includeDescriptions, autoApprove) {
+        const randomCategory = targetCategories[Math.floor(Math.random() * targetCategories.length)];
+        const randomName = sampleProductNames[Math.floor(Math.random() * sampleProductNames.length)] + 
+                          ' #' + Math.floor(Math.random() * 10000);
+        const randomPrice = (Math.random() * (maxPrice - minPrice) + minPrice).toFixed(2);
+        const randomStock = Math.floor(Math.random() * (maxStock - minStock + 1)) + minStock;
+        const randomDescription = includeDescriptions ? 
+            sampleDescriptions[Math.floor(Math.random() * sampleDescriptions.length)] : '';
+        
+        const productData = {
+            name: randomName,
+            category: randomCategory,
+            price: randomPrice,
+            stock: randomStock,
+            description: randomDescription
+        };
+        
+        try {
+            const response = await apiCall('/core/products/', 'POST', productData);
+            
+            // Auto-approve if requested
+            if (autoApprove && response.data) {
+                try {
+                    await apiCall(`/core/products/${response.data.uuid}/approval/`, 'POST', {
+                        action: 'approve'
+                    });
+                } catch (approvalError) {
+                    // Log approval failure but don't fail the product creation
+                    console.warn('Failed to auto-approve product:', approvalError);
+                }
+            }
+            
+            return response.data;
+        } catch (error) {
+            throw new Error(error.message || 'Failed to create product');
+        }
+    }
+
+    // Update progress display
+    function updateProgress() {
+        const percentage = Math.round((generationStats.generated + generationStats.failed) / generationStats.total * 100);
+        
+        document.getElementById('progressBar').style.width = percentage + '%';
+        document.getElementById('progressText').textContent = percentage + '%';
+        document.getElementById('generatedCount').textContent = generationStats.generated;
+        document.getElementById('failedCount').textContent = generationStats.failed;
+        document.getElementById('remainingCount').textContent = generationStats.remaining;
+    }
+
+    // Cancel generation
+    function cancelGeneration() {
+        if (generationInProgress) {
+            generationCancelled = true;
+            logMessage('Cancellation requested...', 'warning');
+        }
+    }
+
+    // Log message
+    function logMessage(message, type = 'info') {
+        const log = document.getElementById('generationLog');
+        const timestamp = new Date().toLocaleTimeString();
+        const colorClass = {
+            'info': 'text-info',
+            'success': 'text-success',
+            'error': 'text-danger',
+            'warning': 'text-warning'
+        }[type] || 'text-info';
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = `small ${colorClass}`;
+        logEntry.innerHTML = `<span class="text-muted">[${timestamp}]</span> ${message}`;
+        
+        log.appendChild(logEntry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // Clear log
+    function clearLog() {
+        document.getElementById('generationLog').innerHTML = '';
+    }
+
+    // Add to generation history
+    function addToHistory() {
+        const history = JSON.parse(localStorage.getItem('generationHistory') || '[]');
+        const newEntry = {
+            date: new Date().toISOString(),
+            total: generationStats.total,
+            generated: generationStats.generated,
+            failed: generationStats.failed,
+            successRate: Math.round((generationStats.generated / generationStats.total) * 100),
+            categories: categories.length
+        };
+        
+        history.unshift(newEntry);
+        // Keep only last 10 entries
+        if (history.length > 10) {
+            history.splice(10);
+        }
+        
+        localStorage.setItem('generationHistory', JSON.stringify(history));
+        loadGenerationHistory();
+    }
+
+    // Load generation history
+    function loadGenerationHistory() {
+        const history = JSON.parse(localStorage.getItem('generationHistory') || '[]');
+        const tbody = document.getElementById('generationHistory');
+        
+        if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No generation history available</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = history.map(entry => `
+            <tr>
+                <td>${new Date(entry.date).toLocaleString()}</td>
+                <td>
+                    <span class="badge bg-primary">${entry.generated}</span> / ${entry.total}
+                </td>
+                <td>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar bg-success" style="width: ${entry.successRate}%">
+                            ${entry.successRate}%
+                        </div>
+                    </div>
+                </td>
+                <td>${entry.categories}</td>
+                <td>
+                    <span class="badge bg-${entry.successRate >= 90 ? 'success' : entry.successRate >= 70 ? 'warning' : 'danger'}">
+                        ${entry.successRate >= 90 ? 'Excellent' : entry.successRate >= 70 ? 'Good' : 'Poor'}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function showFieldError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const feedback = field.nextElementSibling.nextElementSibling;
+        
+        field.classList.add('is-invalid');
+        if (feedback && feedback.classList.contains('invalid-feedback')) {
+            feedback.textContent = message;
+        }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCategories();
+        loadGenerationHistory();
+    });
+</script>
+{% endblock %}

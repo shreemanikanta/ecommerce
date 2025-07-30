@@ -4,6 +4,9 @@ from apps.orders.models import Order, OrderItem
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Order model.
+    """
     list_display = [
         "uuid",
         "user",
@@ -11,6 +14,9 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the OrderItem model.
+    """
     list_display = [
         "uuid",
         "order",

@@ -101,13 +101,15 @@ document.getElementById("loginForm").onsubmit = async (e) => {
             
             localStorage.setItem("access_token", json.data.tokens.access);
             localStorage.setItem("refresh_token", json.data.tokens.refresh);
+            localStorage.setItem("role", json.data.role);
             localStorage.setItem("user_id", json.data.id);
+            localStorage.setItem("email", json.data.email);
             
             showMessage("Login successful! Redirecting...", "success");
             
             // Simulate redirect after 2 seconds
             setTimeout(() => {
-                window.location.replace("/task/tasks_page/");
+                window.location.replace("/core/dashboard/");
                 console.log("Would redirect to dashboard");
             }, 2000);
             

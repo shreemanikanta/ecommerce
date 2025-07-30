@@ -11,3 +11,10 @@ class IsStaff(BasePermission):
 class IsAgent(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'agent'
+    
+class IsAdminOrStaff(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and 
+            (request.user.role == 'admin' or request.user.role == 'staff')
+        )
